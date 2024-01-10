@@ -1,45 +1,45 @@
+const { ApolloServer } = require('apollo-server-express'); // Make sure to import from apollo-server-express
+const express = require('express');
 
-const {ApolloServer, gql} = require('apollo-server'); // Tag function to parse the schema
 
-// GraphQL Schema. 
-// It describes what our API can do
-const typeDefs = gql`
-  schema {
-    query: Query
-  }
+const fs = require('fs');
+const path = require('path');
 
-  type Query {
-    greeting: String
-  }
-`;
+// Read the schema file
+const schema = fs.readFileSync(path.join(__dirname, 'schema.graphql'), 'utf8');
 
-/* Now typeDefs is an abstract syntax 
-   tree of the Graphql code:
-    {
-      kind: 'Document',
-      definitions: [
-        {
-          kind: 'ObjectTypeDefinition',
-          description: undefined,
-          name: [Object],
-          interfaces: [],
-          directives: [],
-          fields: [Array]
-        }
-      ],
-      loc: { start: 0, end: 41 }
-    }
-*/
+// Create the GraphQL type definitions
+// const typeDefs = gql`${schema}`;
 
-// Resolver function to return the data. 
-// It has to match our type definitions
-const resolvers = {
-  Query: {
-    greeting: () => 'Hello GraphQL world!👋'
-  }
-}
 
-// Set up the server with ApolloServer
-const server = new ApolloServer({typeDefs, resolvers});
-server.listen({port: 9000})
-  .then(({url}) => console.log(`Server running at ${url}`));
+// mongoDb connection
+const mongoose = require('mongoose');
+const dbConfig = require('./database.js');
+
+// schema db
+const User = require('./models/User.js');
+const Company = require('./models/Company.js');
+
+// gql schema and resolvers
+const typeDefs = require('./schema');
+const resolvers = require('./resolvers');
+
+const startServer = async () => {
+  const app = express();
+  const server = new ApolloServer({ typeDefs, resolvers });
+
+  // Add the server.start() call
+  await server.start();
+  server.applyMiddleware({ app });
+
+  await mongoose.connect('mongodb://localhost:27017/mydatabase', {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+  });
+
+  app.listen({ port: 4000 }, () =>
+      console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`)
+  );
+};
+
+startServer();
