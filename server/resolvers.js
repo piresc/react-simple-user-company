@@ -21,10 +21,36 @@ const resolvers = {
     },
     Mutation: {
         createUser: (_, { name, email }) => User.create({ name, email }),
-        updateUser: (_, { id, name, email }) => User.findByIdAndUpdate(id, { name, email }, { new: true }),
+        updateUser: async (_, { id, name, email }) => {
+            const updateData = {};
+            if (name !== undefined) {
+              updateData.name = name;
+            }
+            if (email !== undefined) {
+              updateData.email = email;
+            }
+      
+            return await User.findByIdAndUpdate(id, updateData, { new: true });
+          },
         deleteUser: (_, { id }) => User.findByIdAndRemove(id),
         createCompany: (_, { name, yearOfCreation }) => Company.create({ name, yearOfCreation }),
-        updateCompany: (_, { id, name, yearOfCreation }) => Company.findByIdAndUpdate(id, { name, yearOfCreation }, { new: true }),
+
+        updateCompany: async (_, { id, name, yearOfCreation }) => {
+            try {
+              const updateData = {};
+              if (name !== undefined) {
+                updateData.name = name;
+              }
+              if (yearOfCreation !== undefined) {
+                updateData.yearOfCreation = yearOfCreation;
+              }
+      
+              return await Company.findByIdAndUpdate(id, updateData, { new: true });
+            } catch (error) {
+              throw new Error(error.message);
+            }
+          },
+
         deleteCompany: (_, { id }) => Company.findByIdAndRemove(id),
         addUserToCompany: async (_, { userId, companyId }) => {
             await User.findByIdAndUpdate(userId, { company: companyId });
@@ -34,6 +60,19 @@ const resolvers = {
             await User.findByIdAndUpdate(userId, { company: null });
             return Company.findByIdAndUpdate(companyId, { $pull: { users: userId } }, { new: true }).populate('users');
         },
+        removeAllUsersFromCompany: async (_, { companyId }) => {
+            try {
+              const updatedCompany = await Company.findByIdAndUpdate(
+                companyId,
+                { $set: { users: [] } }, // Set the 'users' array to an empty array
+                { new: true } // Return the updated document
+              );
+      
+              return updatedCompany;
+            } catch (error) {
+              throw new Error(error.message);
+            }
+          },
     },
 };
 

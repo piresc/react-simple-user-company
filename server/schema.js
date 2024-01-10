@@ -29,6 +29,7 @@ const typeDefs = gql`
         deleteCompany(id: ID!): Company
         addUserToCompany(userId: ID!, companyId: ID!): Company
         removeUserFromCompany(userId: ID!, companyId: ID!): Company
+        removeAllUsersFromCompany(companyId: ID!): Company
     }
 `;
 

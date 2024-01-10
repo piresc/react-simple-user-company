@@ -1,13 +1,6 @@
 const { ApolloServer } = require('apollo-server-express'); // Make sure to import from apollo-server-express
 const express = require('express');
 
-
-const fs = require('fs');
-const path = require('path');
-
-// Read the schema file
-const schema = fs.readFileSync(path.join(__dirname, 'schema.graphql'), 'utf8');
-
 // Create the GraphQL type definitions
 // const typeDefs = gql`${schema}`;
 
